@@ -27,6 +27,17 @@ def get_contents_beautifulsoup(url):
     doc = BeautifulSoup(r.text, "html.parser")
     return doc
 
+def dict_traverse(dictionary):
+    list1 = []
+    for k, v in dictionary.items():
+        if type(v)==dict:
+            dict_traverse(v)
+        else:
+            if k=='has_actual_size':
+                del dictionary.items()[k]
+            list1.append(v)
+    return ''.join(map(str,list1))
+
 def extract_product_links(content):
     product_url_regex = re.compile(r"<a class='lpc-teaserCarousel_link' href='(.*?)' data-ga-event-action=.*?")
     result = re.findall(product_url_regex, content)
@@ -187,9 +198,10 @@ def get_tale_of_size(url):
     if api_url:
         api_content = get_contents(api_url[0])
         json_data = json.loads(api_content)
-        return json_data['size_chart']
+        if json_data['size_chart']:
+            dict_traverse(json_data['size_chart'])
     else:
-        return "Not Found."
+        return "Not found." 
 
 def get_aggregate_review(url):
     content = get_contents(url)
@@ -222,12 +234,12 @@ def get_all_kws(url):
     return kw_str
 
 url1 = "https://shop.adidas.jp/men/"
-# url = "https://shop.adidas.jp/products/HB9386/"
+url = "https://shop.adidas.jp/products/HB9386/"
 # url3 = "https://shop.adidas.jp/f/v1/pub/size_chart/28898"
 content = get_contents(url1)
 with open('product_details.csv', 'w', encoding='utf8') as f:
     the_writer = writer(f)
-    header = ['Product Details Links', 'Category Breadcrumb', 'Category Name', 'Product Name', 'Price', 'Sizes', 'Sense', 'Image URL', 'Coordinate Product Codes','Coordinate Product urls','Coordinate Product img urls','Coordinate Product names', 'Coordinate Product Prices', 'Description', 'Heading', 'Itemization', 'Taleof Size', 'Overall Review', 'Each Review', 'Product Keywords']
+    header = ['Product Details Links', 'Category Breadcrumb', 'Category Name', 'Product Name', 'Price', 'Sizes', 'Sense', 'Image URL', 'Coordinate Product Codes','Coordinate Product urls','Coordinate Product img urls','Coordinate Product names', 'Coordinate Product Prices', 'Description', 'Heading', 'Itemization', 'Taleof Size','Overall Review', 'Each Review', 'Product Keywords']
     the_writer.writerow(header)
     prod_links = extract_product_links(content)
     all_product_detail_links= []
@@ -255,7 +267,7 @@ with open('product_details.csv', 'w', encoding='utf8') as f:
         product_kw = get_all_kws(url)
         product_row = [url, breadcrumb, cat_name, product_name, product_price, product_sizes, product_sense, product_img_url, product_coords_codes, product_coords_urls, product_coords_img_urls, product_coords_name, product_coords_price, product_description, product_heading, product_description_item, tale_of_size, aggregate_review, each_review, product_kw]
         the_writer.writerow(product_row)
-url = "https://shop.adidas.jp/products/HQ4540/"
+# url = "https://shop.adidas.jp/products/HQ4540/"
 
 # content2 = get_contents_beautifulsoup(url)
 # content3 = get_contents_beautifulsoup(url1)
@@ -275,8 +287,8 @@ url = "https://shop.adidas.jp/products/HQ4540/"
 # print(product_sense)
 # product_img_url = get_product_image_url(url)
 # print(product_img_url)
-product_coords = get_product_coordinates_price(url)
-print(product_coords)
+# product_coords = get_product_coordinates_price(url)
+# print(product_coords)
 # product_description = get_general_desc(url)
 # print(product_description)
 # product_heading = get_heading(url)
@@ -290,5 +302,5 @@ print(product_coords)
 # product_aggregate_review = get_aggregate_review(url)
 # print(product_aggregate_review)
 #item_tile_wrapper test-item_tile_wrapper clearfix
-
+print('terminated');
 #https://shop.adidas.jp/f/v1/pub/size_chart/28898
