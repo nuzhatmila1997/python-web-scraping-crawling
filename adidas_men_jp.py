@@ -33,8 +33,6 @@ def dict_traverse(dictionary):
         if type(v)==dict:
             dict_traverse(v)
         else:
-            if k=='has_actual_size':
-                del dictionary.items()[k]
             list1.append(v)
     return ''.join(map(str,list1))
 
